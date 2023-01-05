@@ -1,11 +1,5 @@
 #pragma once
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#undef WIN32_LEAN_AND_MEAN
-#endif
-
 #ifdef __EMSCRIPTEN__
 #include <emscripten/html5.h>
 #endif
@@ -72,7 +66,9 @@ void wgpu_destroy_all_objects(void);
 #ifdef __EMSCRIPTEN__
 WGpuCanvasContext wgpu_canvas_get_webgpu_context(const char *canvasSelector NOTNULL);
 #elif defined (_WIN32)
-WGpuCanvasContext wgpu_canvas_get_webgpu_context(HWND hwnd);
+#define _HWND void* // Avoid including win32.h when all we need is HWND, which is a void*.
+WGpuCanvasContext wgpu_canvas_get_webgpu_context(_HWND hwnd);
+#undef _HWND
 #else
 #error Targeting currently unsupported platform! (no declaration for wgpu_canvas_get_webgpu_context())
 #endif
