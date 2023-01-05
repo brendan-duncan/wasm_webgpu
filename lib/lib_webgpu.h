@@ -68,7 +68,6 @@ WGpuCanvasContext wgpu_canvas_get_webgpu_context(const char *canvasSelector NOTN
 #elif defined (_WIN32)
 #define _HWND void* // Avoid including win32.h when all we need is HWND, which is a void*.
 WGpuCanvasContext wgpu_canvas_get_webgpu_context(_HWND hwnd);
-#undef _HWND
 #else
 #error Targeting currently unsupported platform! (no declaration for wgpu_canvas_get_webgpu_context())
 #endif

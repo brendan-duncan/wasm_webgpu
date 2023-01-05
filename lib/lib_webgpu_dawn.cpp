@@ -9,6 +9,7 @@
 #include <vector>
 #include <assert.h>
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #endif
 
@@ -811,7 +812,7 @@ void wgpu_destroy_all_objects() {
   _dawn_to_webgpu->clear();
 }
 
-WGpuCanvasContext wgpu_canvas_get_webgpu_context(HWND hwnd) {
+WGpuCanvasContext wgpu_canvas_get_webgpu_context(_HWND hwnd) {
   WGPUSurfaceDescriptor surfaceDesc;
 
 #ifdef _WIN32
