@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#undef WIN32_LEAN_AND_MEAN
+#endif
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten/html5.h>
 #endif
