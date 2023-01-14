@@ -749,7 +749,7 @@ void _wgpu_object_destroy(WGpuDawnObject* obj) {
 extern "C" {
 
 uint32_t wgpu_get_num_live_objects() {
-  return _dawn_to_webgpu->size();
+  return (uint32_t)_dawn_to_webgpu->size();
 }
 
 void wgpu_object_destroy(WGpuObjectBase wgpuObject) {
@@ -776,7 +776,13 @@ void wgpu_destroy_all_objects() {
   _dawn_to_webgpu->clear();
 }
 
-WGpuCanvasContext wgpu_canvas_get_webgpu_context(_HWND hwnd) {
+#ifdef _WIN32
+WGpuCanvasContext wgpu_canvas_get_webgpu_context(HWND hwnd) {
+#elif __APPLE__
+WGpuCanvasContext wgpu_canvas_get_webgpu_context(void* window) {
+#else
+#error Targeting currently unsupported platform! (no declaration for wgpu_canvas_get_webgpu_context())
+#endif
   WGPUSurfaceDescriptor surfaceDesc;
 
 #ifdef _WIN32
@@ -854,6 +860,12 @@ void wgpu_object_set_label(WGpuObjectBase objBase, const char* label) {
     break;
   case kWebGPUQuerySet:
     wgpuQuerySetSetLabel((WGPUQuerySet)obj->dawnObject, label);
+    break;
+  case kWebGPUInvalidObject:
+  case kWebGPUAdapter:
+  case kWebGPURenderBundle:
+  case kWebGPURenderBundleEncoder:
+  case kWebGPUCanvasContext:
     break;
   }
 }
@@ -1050,12 +1062,14 @@ WGpuDevice wgpu_adapter_request_device_sync(WGpuAdapter adapter, const WGpuDevic
 
 void wgpu_adapter_request_device_async_simple(WGpuAdapter adapter, WGpuRequestDeviceCallback deviceCallback) {
   assert(wgpu_is_adapter(adapter));
-  wgpu_adapter_request_device_async(adapter, nullptr, deviceCallback, nullptr);
+  WGpuDeviceDescriptor desc = {};
+  wgpu_adapter_request_device_async(adapter, &desc, deviceCallback, nullptr);
 }
 
 WGpuDevice wgpu_adapter_request_device_sync_simple(WGpuAdapter adapter) {
   assert(wgpu_is_adapter(adapter));
-  return wgpu_adapter_request_device_sync(adapter, nullptr);
+  WGpuDeviceDescriptor desc = {};
+  return wgpu_adapter_request_device_sync(adapter, &desc);
 }
 
 void wgpu_adapter_request_adapter_info_async(WGpuAdapter adapter, const char** unmaskHints,
@@ -1117,12 +1131,6 @@ WGpuTexture wgpu_device_create_texture(WGpuDevice device, const WGpuTextureDescr
 
 WGpuSampler wgpu_device_create_sampler(WGpuDevice device, const WGpuSamplerDescriptor* samplerDesc) {
   assert(wgpu_is_device(device));
-  // samplerDesc can be a nullptr;
-
-  if (samplerDesc == nullptr) {
-    WGPUSampler sampler = wgpuDeviceCreateSampler(_wgpu_get_dawn<WGPUDevice>(device), nullptr);
-    return _wgpu_store_and_set_parent(kWebGPUSampler, sampler, device);
-  }
 
   WGPUSamplerDescriptor _desc = {};
   _desc.addressModeU = wgpu_address_mode_to_dawn(samplerDesc->addressModeU);
@@ -1341,7 +1349,6 @@ static WGPUBlendComponent fillBlendComponent(const WGpuBlendComponent& blendComp
 
 WGpuRenderPipeline wgpu_device_create_render_pipeline(WGpuDevice device, const WGpuRenderPipelineDescriptor* renderPipelineDesc) {
   assert(wgpu_is_device(device));
-  assert(renderPipelineDesc != nullptr);
 
   WGPURenderPipelineDescriptor _desc = {};
   _desc.layout = _wgpu_get_dawn<WGPUPipelineLayout>(renderPipelineDesc->layout);
@@ -1462,11 +1469,10 @@ WGpuRenderPipeline wgpu_device_create_render_pipeline(WGpuDevice device, const W
 void wgpu_device_create_render_pipeline_async(WGpuDevice device, const WGpuRenderPipelineDescriptor *renderPipelineDesc,
     WGpuCreatePipelineCallback callback, void *userData) {
   assert(wgpu_is_device(device));
-  assert(renderPipelineDesc != nullptr);
-  assert(callback);
+  assert(callback != nullptr);
 
   WGPURenderPipelineDescriptor _desc = {};
-  _desc.layout = renderPipelineDesc->layout > 0 ? _wgpu_get_dawn<WGPUPipelineLayout>(renderPipelineDesc->layout) : 0;
+  _desc.layout = renderPipelineDesc->layout != (WGpuPipelineLayout)0 ? _wgpu_get_dawn<WGPUPipelineLayout>(renderPipelineDesc->layout) : 0;
   _desc.nextInChain = nullptr;
   _desc.label = nullptr;
 
@@ -1549,7 +1555,7 @@ void wgpu_device_create_render_pipeline_async(WGpuDevice device, const WGpuRende
     fragmentState.constantCount = fragment.numConstants;
     fragmentState.entryPoint = fragment.entryPoint;
     fragmentState.nextInChain = nullptr;
-    fragmentState.module = fragment.module > 0 ? _wgpu_get_dawn<WGPUShaderModule>(fragment.module) : 0;
+    fragmentState.module = fragment.module != (WGpuShaderModule)0 ? _wgpu_get_dawn<WGPUShaderModule>(fragment.module) : 0;
     fragmentState.targetCount = fragment.numTargets;
 
     
@@ -1621,7 +1627,6 @@ WGpuCommandEncoder wgpu_device_create_command_encoder_simple(WGpuDevice device) 
 
 WGpuRenderBundleEncoder wgpu_device_create_render_bundle_encoder(WGpuDevice device, const WGpuRenderBundleEncoderDescriptor *renderBundleEncoderDesc) {
   assert(wgpu_is_device(device));
-  assert(renderBundleEncoderDesc != nullptr);
 
   std::vector<WGPUTextureFormat> colorFormats(renderBundleEncoderDesc->numColorFormats);
   for (int i = 0; i < renderBundleEncoderDesc->numColorFormats; ++i)
@@ -1641,7 +1646,6 @@ WGpuRenderBundleEncoder wgpu_device_create_render_bundle_encoder(WGpuDevice devi
 
 WGpuQuerySet wgpu_device_create_query_set(WGpuDevice device, const WGpuQuerySetDescriptor *querySetDesc) {
   assert(wgpu_is_device(device));
-  assert(querySetDesc != nullptr);
 
   WGPUQuerySetDescriptor _desc = {};
   _desc.type = wgpu_query_type_to_dawn(querySetDesc->type);
@@ -1948,7 +1952,7 @@ WGpuRenderPassEncoder wgpu_command_encoder_begin_render_pass(WGpuCommandEncoder 
   WGPURenderPassDepthStencilAttachment depthStencil = {};
   
   const auto& _depthStencil = renderPassDesc->depthStencilAttachment;
-  if (_depthStencil.view <= 0) {
+  if (_depthStencil.view == nullptr) {
     _desc.depthStencilAttachment = nullptr;
   } else {
     depthStencil.view = _wgpu_get_dawn<WGPUTextureView>(_depthStencil.view);
@@ -2478,7 +2482,6 @@ EM_BOOL wgpu_is_canvas_context(WGpuObjectBase object) {
 
 void wgpu_canvas_context_configure(WGpuCanvasContext canvasContext, const WGpuCanvasConfiguration *config, int width, int height) {
   assert(wgpu_is_canvas_context(canvasContext));
-  assert(config != nullptr);
 
   _WGpuCanvasContext* context = _wgpu_get_dawn<_WGpuCanvasContext*>(canvasContext);
   if (context->swapChain)

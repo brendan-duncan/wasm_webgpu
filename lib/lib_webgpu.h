@@ -65,8 +65,9 @@ void wgpu_destroy_all_objects(void);
 #ifdef __EMSCRIPTEN__
 WGpuCanvasContext wgpu_canvas_get_webgpu_context(const char *canvasSelector NOTNULL);
 #elif defined (_WIN32)
-#define _HWND void* // Avoid including win32.h when all we need is HWND, which is a void*.
-WGpuCanvasContext wgpu_canvas_get_webgpu_context(_HWND hwnd);
+WGpuCanvasContext wgpu_canvas_get_webgpu_context(HWND hwnd NOTNULL);
+#elif defined (__APPLE__)
+WGpuCanvasContext wgpu_canvas_get_webgpu_context(void* window NOTNULL);
 #else
 #error Targeting currently unsupported platform! (no declaration for wgpu_canvas_get_webgpu_context())
 #endif
