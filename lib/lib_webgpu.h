@@ -1895,10 +1895,10 @@ typedef struct WGpuVertexState
 {
   WGpuShaderModule module;
   const char *entryPoint;
-  int numBuffers;
   const WGpuVertexBufferLayout *buffers;
-  int numConstants;
   const WGpuPipelineConstant *constants;
+  int numBuffers;
+  int numConstants;
 } WGpuVertexState;
 
 /*
