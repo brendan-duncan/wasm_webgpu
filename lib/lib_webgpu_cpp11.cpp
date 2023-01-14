@@ -23,6 +23,9 @@ const WGpuTextureDescriptor WGPU_TEXTURE_DESCRIPTOR_DEFAULT_INITIALIZER = {
   0, /* format */
   0, /* usage */
   0, /* numViewFormats */
+#ifdef ALIGN_64BIT
+  0, /* padding */
+#endif
   nullptr /* viewFormats */
 };
 
@@ -38,7 +41,10 @@ const WGpuTextureViewDescriptor WGPU_TEXTURE_VIEW_DESCRIPTOR_DEFAULT_INITIALIZER
 
 const WGpuExternalTextureDescriptor WGPU_EXTERNAL_TEXTURE_DESCRIPTOR_DEFAULT_INITIALIZER = {
   0, /* source */
-  HTML_PREDEFINED_COLOR_SPACE_SRGB /* colorSpace */
+  HTML_PREDEFINED_COLOR_SPACE_SRGB, /* colorSpace */
+#ifdef ALIGN_64BIT
+  0 /* padding */
+#endif
 };
 
 const WGpuSamplerDescriptor WGPU_SAMPLER_DESCRIPTOR_DEFAULT_INITIALIZER = {
@@ -94,6 +100,9 @@ const WGpuCanvasConfiguration WGPU_CANVAS_CONFIGURATION_DEFAULT_INITIALIZER = {
   0, /* format */
   WGPU_TEXTURE_USAGE_RENDER_ATTACHMENT, /* usage */
   0, /* numViewFormats */
+#ifdef ALIGN_64BIT
+  0, /* padding */
+#endif
   nullptr, /* viewFormats */
   HTML_PREDEFINED_COLOR_SPACE_SRGB, /* colorSpace */
   WGPU_CANVAS_ALPHA_MODE_OPAQUE, /* alphaMode */
@@ -121,8 +130,8 @@ const WGpuRenderPipelineDescriptor WGPU_RENDER_PIPELINE_DESCRIPTOR_DEFAULT_INITI
     0, /* module */
     nullptr, /* entryPoint */
     0, /* numBuffers */
-    nullptr, /* buffers */
     0, /* numConstants */
+    nullptr, /* buffers */
     nullptr, /* constants */
   },
   { /* primitive */
@@ -158,14 +167,17 @@ const WGpuRenderPipelineDescriptor WGPU_RENDER_PIPELINE_DESCRIPTOR_DEFAULT_INITI
   { /* multisample */
     1, /* count */
     0xFFFFFFFFu, /* mask */
-    false /* alphaToCoverageEnabled */
+    false, /* alphaToCoverageEnabled */
+#ifdef ALIGN_64BIT
+    0 /* padding */
+#endif
   },
   { /* fragment */
     0, /* module */
     nullptr, /* entryPoint */
     0, /* numTargets */
-    nullptr, /* targets */
     0, /* numConstants */
+    nullptr, /* targets */
     nullptr /* constants */
   },
   0 /* layout */
@@ -196,7 +208,10 @@ extern const WGpuImageCopyExternalImage WGPU_IMAGE_COPY_EXTERNAL_IMAGE_DEFAULT_I
       0,
       0
   },
-  false /* flipY */
+  false, /* flipY */
+#ifdef ALIGN_64BIT
+  0 /* padding */
+#endif
 };
 
 extern const WGpuImageCopyTexture WGPU_IMAGE_COPY_TEXTURE_DEFAULT_INITIALIZER = {
@@ -207,7 +222,10 @@ extern const WGpuImageCopyTexture WGPU_IMAGE_COPY_TEXTURE_DEFAULT_INITIALIZER = 
       0,
       0
   },
-  WGPU_TEXTURE_ASPECT_ALL /* aspect */
+  WGPU_TEXTURE_ASPECT_ALL, /* aspect */
+#ifdef ALIGN_64BIT
+  0 /* padding */
+#endif
 };
 
 extern const WGpuImageCopyTextureTagged WGPU_IMAGE_COPY_TEXTURE_TAGGED_DEFAULT_INITIALIZER = {
@@ -220,7 +238,10 @@ extern const WGpuImageCopyTextureTagged WGPU_IMAGE_COPY_TEXTURE_TAGGED_DEFAULT_I
   },
   WGPU_TEXTURE_ASPECT_ALL, /* aspect */
   HTML_PREDEFINED_COLOR_SPACE_SRGB, /* colorSpace */
-  EM_FALSE /* premultipliedAlpha */
+  EM_FALSE, /* premultipliedAlpha */
+#ifdef ALIGN_64BIT
+  0 /* padding */
+#endif
 };
 
 #ifdef __cplusplus

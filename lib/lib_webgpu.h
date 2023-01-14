@@ -14,6 +14,9 @@
 
 #ifdef __clang__
 #pragma clang diagnostic error "-Wpadded"
+#ifdef __APPLE__
+#define ALIGN_64BIT 1   // Need a better way to know if we are compiling for 32-bit or 64-bit
+#endif
 #endif
 
 #ifdef _MSC_VER
@@ -389,7 +392,9 @@ typedef struct WGpuDeviceDescriptor
   uint32_t _explicitPaddingFor8BytesAlignedSize; // alignof(WGpuSupportedLimits) is 64-bit, hence explicitly show a padding here.
   WGpuSupportedLimits requiredLimits;
   WGpuQueueDescriptor defaultQueue;
+#ifndef ALIGN_64BIT
   uint32_t _explicitPaddingFor8BytesAlignedSize2;
+#endif
 } WGpuDeviceDescriptor;
 extern const WGpuDeviceDescriptor WGPU_DEVICE_DESCRIPTOR_DEFAULT_INITIALIZER;
 
@@ -643,6 +648,9 @@ typedef struct WGpuTextureDescriptor
   WGPU_TEXTURE_FORMAT format;
   WGPU_TEXTURE_USAGE_FLAGS usage;
   int numViewFormats;
+#ifdef ALIGN_64BIT
+  uint32_t _explicitPaddingFor8BytesAlignedSize;
+#endif
   WGPU_TEXTURE_FORMAT *viewFormats;
 } WGpuTextureDescriptor;
 extern const WGpuTextureDescriptor WGPU_TEXTURE_DESCRIPTOR_DEFAULT_INITIALIZER;
@@ -1009,6 +1017,9 @@ typedef struct WGpuExternalTextureDescriptor
   // to pin/register the video element to a Wasm referenceable object ID.
   WGpuObjectBase source;
   HTML_PREDEFINED_COLOR_SPACE colorSpace;
+#ifdef ALIGN_64BIT
+  uint32_t _explicitPaddingFor8BytesAlignedSize;
+#endif
 } WGpuExternalTextureDescriptor;
 extern const WGpuExternalTextureDescriptor WGPU_EXTERNAL_TEXTURE_DESCRIPTOR_DEFAULT_INITIALIZER;
 
@@ -1307,6 +1318,9 @@ dictionary GPUBindGroupEntry {
 typedef struct WGpuBindGroupEntry
 {
   uint32_t binding;
+#ifdef ALIGN_64BIT
+  uint32_t _explicitPaddingFor8BytesAlignedSize;
+#endif
   WGpuObjectBase resource;
   // If 'resource' points to a WGpuBuffer, bufferBindOffset and bufferBindSize specify
   // the offset and length of the buffer to bind. If 'resource' does not point to a WGpuBuffer,
@@ -1384,6 +1398,9 @@ typedef struct WGpuShaderModuleDescriptor
   const char *code;
   // TODO: add sourceMap support
   int numHints;
+#ifdef ALIGN_64BIT
+  uint32_t _unused64BitPadding;
+#endif
   const WGpuShaderModuleCompilationHint *hints;
 } WGpuShaderModuleDescriptor;
 
@@ -1442,6 +1459,9 @@ typedef struct WGpuCompilationMessage
   // The number of UTF-16 code units in the substring that message corresponds to. If the message
   // does not correspond with a substring then length must be 0.
   uint32_t length;
+#ifdef ALIGN_64BIT
+  uint32_t _unused64BitPadding;
+#endif
 } WGpuCompilationMessage;
 
 /*
@@ -1453,6 +1473,9 @@ interface GPUCompilationInfo {
 typedef struct WGpuCompilationInfo
 {
   int numMessages;
+#ifdef ALIGN_64BIT
+  uint32_t _unused64BitPadding;
+#endif
   WGpuCompilationMessage messages[];
 } WGpuCompilationInfo;
 // Deallocates a WGpuCompilationInfo object produced by a call to wgpu_free_compilation_info()
@@ -1499,6 +1522,9 @@ typedef struct WGpuPipelineConstant
 {
   const char *name;
   uint32_t _dummyPadding; // (would be automatically inserted by the compiler, but present here for explicity)
+#ifdef ALIGN_64BIT
+  uint32_t _unused64BitPadding;
+#endif
   double value;
 } WGpuPipelineConstant;
 
@@ -1618,6 +1644,9 @@ typedef struct WGpuMultisampleState
   uint32_t count;
   uint32_t mask;
   EM_BOOL alphaToCoverageEnabled;
+#ifdef ALIGN_64BIT
+  uint32_t _explicitPaddingFor8BytesAlignedSize;
+#endif
 } WGpuMultisampleState;
 
 /*
@@ -1630,8 +1659,8 @@ typedef struct WGpuFragmentState
   WGpuShaderModule module;
   const char *entryPoint;
   int numTargets;
-  const WGpuColorTargetState *targets;
   int numConstants;
+  const WGpuColorTargetState *targets;
   const WGpuPipelineConstant *constants;
 } WGpuFragmentState;
 
@@ -1895,10 +1924,10 @@ typedef struct WGpuVertexState
 {
   WGpuShaderModule module;
   const char *entryPoint;
-  const WGpuVertexBufferLayout *buffers;
-  const WGpuPipelineConstant *constants;
   int numBuffers;
   int numConstants;
+  const WGpuVertexBufferLayout *buffers;
+  const WGpuPipelineConstant *constants;
 } WGpuVertexState;
 
 /*
@@ -1911,10 +1940,13 @@ dictionary GPUVertexBufferLayout {
 typedef struct WGpuVertexBufferLayout
 {
   int numAttributes;
+#ifdef ALIGN_64BIT
+  uint32_t _unused64BitPadding;
+#endif
   const WGpuVertexAttribute *attributes;
   uint64_t arrayStride;
   WGPU_VERTEX_STEP_MODE stepMode;
-  uint32_t _unused64BitPadding;
+  uint32_t _unused64BitPadding2;
 } WGpuVertexBufferLayout;
 
 /*
@@ -2068,7 +2100,9 @@ typedef struct WGpuImageCopyBuffer
   uint32_t bytesPerRow;
   uint32_t rowsPerImage;
   WGpuBuffer buffer;
+#ifndef ALIGN_64BIT
   uint32_t _explicitPaddingFor8BytesAlignedSize;
+#endif
 } WGpuImageCopyBuffer;
 extern const WGpuImageCopyBuffer WGPU_IMAGE_COPY_BUFFER_DEFAULT_INITIALIZER;
 
@@ -2185,6 +2219,9 @@ dictionary GPUComputePassDescriptor : GPUObjectDescriptorBase {
 typedef struct WGpuComputePassDescriptor
 {
   uint32_t numTimestampWrites;
+#ifdef ALIGN_64BIT
+    uint32_t _unused64BitPadding;
+#endif
   WGpuComputePassTimestampWrite *timestampWrites;
 } WGpuComputePassDescriptor;
 
@@ -2407,6 +2444,9 @@ dictionary GPURenderBundleEncoderDescriptor : GPURenderPassLayout {
 typedef struct WGpuRenderBundleEncoderDescriptor
 {
   int numColorFormats;
+#ifdef ALIGN_64BIT
+  uint32_t _unused64BitPadding;
+#endif
   const WGPU_TEXTURE_FORMAT *colorFormats;
   WGPU_TEXTURE_FORMAT depthStencilFormat;
   uint32_t sampleCount;
@@ -2760,6 +2800,9 @@ typedef struct WGpuCanvasConfiguration
   WGPU_TEXTURE_FORMAT format;
   WGPU_TEXTURE_USAGE_FLAGS usage;
   int numViewFormats;
+#ifdef ALIGN_64BIT
+  uint32_t _explicitPaddingFor8BytesAlignedSize;
+#endif
   WGPU_TEXTURE_FORMAT *viewFormats;
   HTML_PREDEFINED_COLOR_SPACE colorSpace;
   WGPU_CANVAS_ALPHA_MODE alphaMode;
@@ -2804,11 +2847,11 @@ dictionary GPURenderPassDescriptor : GPUObjectDescriptorBase {
 typedef struct WGpuRenderPassDescriptor
 {
   int numColorAttachments;
+  uint32_t numTimestampWrites;
   const WGpuRenderPassColorAttachment *colorAttachments;
   WGpuRenderPassDepthStencilAttachment depthStencilAttachment;
   WGpuQuerySet occlusionQuerySet;
   double_int53_t maxDrawCount; // If set to zero, the default value (50000000) will be used.
-  uint32_t numTimestampWrites;
   WGpuRenderPassTimestampWrite *timestampWrites;
 } WGpuRenderPassDescriptor;
 
@@ -2816,7 +2859,6 @@ typedef struct WGpuRenderPassColorAttachment
 {
   WGpuTextureView view;
   WGpuTextureView resolveTarget;
-
   WGPU_STORE_OP storeOp; // Required, be sure to set to WGPU_STORE_OP_STORE (default) or WGPU_STORE_OP_DISCARD
   WGPU_LOAD_OP loadOp; // Either WGPU_LOAD_OP_LOAD (== default, 0) or WGPU_LOAD_OP_CLEAR.
   WGpuColor clearValue; // Used if loadOp == WGPU_LOAD_OP_CLEAR. Default value = { r = 0.0, g = 0.0, b = 0.0, a = 1.0 }
@@ -2828,6 +2870,9 @@ typedef struct WGpuImageCopyExternalImage
   WGpuObjectBase source; // must point to a WGpuImageBitmap (could also point to a HTMLVideoElement, HTMLCanvasElement or OffscreenCanvas, but those are currently unimplemented)
   WGpuOrigin2D origin;
   EM_BOOL flipY; // defaults to EM_FALSE.
+#ifdef ALIGN_64BIT
+  uint32_t _explicitPaddingFor8BytesAlignedSize;
+#endif
 } WGpuImageCopyExternalImage;
 extern const WGpuImageCopyExternalImage WGPU_IMAGE_COPY_EXTERNAL_IMAGE_DEFAULT_INITIALIZER;
 
@@ -2837,6 +2882,9 @@ typedef struct WGpuImageCopyTexture
   uint32_t mipLevel;
   WGpuOrigin3D origin;
   WGPU_TEXTURE_ASPECT aspect;
+#ifdef ALIGN_64BIT
+  uint32_t _explicitPaddingFor8BytesAlignedSize;
+#endif
 } WGpuImageCopyTexture;
 extern const WGpuImageCopyTexture WGPU_IMAGE_COPY_TEXTURE_DEFAULT_INITIALIZER;
 
@@ -2847,9 +2895,11 @@ typedef struct WGpuImageCopyTextureTagged
   uint32_t mipLevel;
   WGpuOrigin3D origin;
   WGPU_TEXTURE_ASPECT aspect;
-
   HTML_PREDEFINED_COLOR_SPACE colorSpace; // = "srgb";
   EM_BOOL premultipliedAlpha; // = false;
+#ifdef ALIGN_64BIT
+  uint32_t _explicitPaddingFor8BytesAlignedSize;
+#endif
 } WGpuImageCopyTextureTagged;
 extern const WGpuImageCopyTextureTagged WGPU_IMAGE_COPY_TEXTURE_TAGGED_DEFAULT_INITIALIZER;
 
