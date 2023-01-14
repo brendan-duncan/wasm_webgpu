@@ -1254,7 +1254,6 @@ WGpuBindGroup wgpu_device_create_bind_group(WGpuDevice device, WGpuBindGroupLayo
 
 WGpuShaderModule wgpu_device_create_shader_module(WGpuDevice device, const WGpuShaderModuleDescriptor* shaderModuleDesc) {
   assert(wgpu_is_device(device));
-  assert(shaderModuleDesc != nullptr);
 
   WGPUShaderModuleWGSLDescriptor wgslDescriptor = {};
   wgslDescriptor.source = shaderModuleDesc->code;
