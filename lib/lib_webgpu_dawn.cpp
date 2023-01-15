@@ -777,7 +777,7 @@ void wgpu_destroy_all_objects() {
 }
 
 #ifdef _WIN32
-WGpuCanvasContext wgpu_canvas_get_webgpu_context(HWND hwnd) {
+WGpuCanvasContext wgpu_canvas_get_webgpu_context(_HWND hwnd) {
 #elif __APPLE__
 WGpuCanvasContext wgpu_canvas_get_webgpu_context(void* window) {
 #else
