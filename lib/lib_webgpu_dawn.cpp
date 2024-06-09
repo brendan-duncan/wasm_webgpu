@@ -1158,7 +1158,12 @@ WGpuBuffer wgpu_device_create_buffer(WGpuDevice device, const WGpuBufferDescript
   _desc.nextInChain = nullptr;
 
   WGPUBuffer buffer = wgpuDeviceCreateBuffer(_wgpu_get_dawn<WGPUDevice>(device), &_desc);
-  return _wgpu_store_and_set_parent(kWebGPUBuffer, buffer, device);
+  WGpuBuffer id = _wgpu_store_and_set_parent(kWebGPUBuffer, buffer, device);
+  if (bufferDesc->mappedAtCreation) {
+    _WGpuObjectBuffer* obj = (_WGpuObjectBuffer*)_wgpu_get(id);
+    obj->state = kWebGPUBufferMapStateMappedForWriting;
+  }
+  return id;
 }
 
 WGpuTexture wgpu_device_create_texture(WGpuDevice device, const WGpuTextureDescriptor* textureDesc) {
