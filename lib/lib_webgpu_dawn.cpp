@@ -820,7 +820,7 @@ void wgpu_destroy_all_objects() {
 }
 
 WGpuCanvasContext wgpu_canvas_get_webgpu_context(void *hwnd) {
-  WGPUSurfaceDescriptor surfaceDesc;
+  WGPUSurfaceDescriptor surfaceDesc{};
 
 #ifdef _WIN32
   WGPUSurfaceDescriptorFromWindowsHWND chainedDesc;
